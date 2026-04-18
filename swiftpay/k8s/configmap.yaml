@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swiftpay-config
+  namespace: default
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://swiftpay-postgres:5432/swiftpay?options=-c%20TimeZone%3DUTC"
+  SPRING_DATA_REDIS_HOST: "swiftpay-redis"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "swiftpay-kafka:9092"
+  SWIFTPAY_KAFKA_TOPICS_PAYMENT_INITIATED: "payment.initiated"
+  SWIFTPAY_KAFKA_TOPICS_PAYMENT_RESULT: "payment.result"
+  SWIFTPAY_DEMO_SEED_USERS: "true"
+  SWIFTPAY_JWT_EXPIRATION_SECONDS: "3600"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftPay Checkout</title>
+    <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="page-shell">
+    <header class="masthead">
+        <div>
+            <p class="eyebrow">SwiftPay Checkout</p>
+            <h1>Fast wallet payments with secure token-based approval.</h1>
+            <p class="hero-text">
+                A polished demo checkout for the hackathon: authenticate as a wallet user, select a receiver,
+                confirm the amount, and watch the ledger trail update in real time.
+            </p>
+        </div>
+        <div class="masthead-actions">
+            <a class="ghost-button" href="/swagger-ui.html" target="_blank" rel="noreferrer">Swagger</a>
+            <a class="ghost-button" href="/actuator/health" target="_blank" rel="noreferrer">Health</a>
+        </div>
+    </header>
+
+    <main class="checkout-layout">
+        <section class="checkout-shell">
+            <div class="checkout-card">
+                <div class="card-topline">
+                    <span class="chip">Secure Wallet Payment</span>
+                    <span class="chip muted" id="service-url">http://localhost:8085</span>
+                </div>
+
+                <section class="checkout-stage">
+                    <div class="stage-copy">
+                        <p class="panel-kicker">Step 1</p>
+                        <h2>Authenticate payer</h2>
+                        <p class="muted-text">
+                            Login as the sender wallet owner. Payments are authorized only for the authenticated user.
+                        </p>
+                    </div>
+                    <form id="login-form" class="inline-form">
+                        <label>
+                            User ID
+                            <input name="userId" placeholder="sender-1" required>
+                        </label>
+                        <label>
+                            Password
+                            <input name="password" type="password" placeholder="demo123" required>
+                        </label>
+                        <button class="primary-button" type="submit">Login</button>
+                    </form>
+                    <div id="auth-status" class="auth-banner">Not authenticated.</div>
+                </section>
+
+                <section class="checkout-stage payment-stage">
+                    <div class="stage-copy">
+                        <p class="panel-kicker">Step 2</p>
+                        <h2>Confirm checkout</h2>
+                        <p class="muted-text">
+                            Choose the sender, receiver, and amount. The request goes through API validation, Redis
+                            idempotency, Kafka event publishing, and ledger settlement.
+                        </p>
+                    </div>
+
+                    <div class="checkout-grid">
+                        <form id="payment-form" class="payment-form">
+                            <label>
+                                Transaction ID
+                                <input name="transactionId" placeholder="txn-1001" required>
+                            </label>
+                            <label>
+                                Sender Wallet
+                                <select name="senderId" id="sender-select" required></select>
+                            </label>
+                            <label>
+                                Receiver Wallet
+                                <select name="receiverId" id="receiver-select" required></select>
+                            </label>
+                            <label>
+                                Amount
+                                <input name="amount" type="number" min="0.01" step="0.01" placeholder="25.00" required>
+                            </label>
+                            <label>
+                                Currency
+                                <input name="currency" value="USD" maxlength="3" required>
+                            </label>
+                            <button class="primary-button checkout-button" type="submit">Pay Securely</button>
+                        </form>
+
+                        <aside class="order-card">
+                            <p class="panel-kicker">Order Summary</p>
+                            <h3>Hackathon Demo Transfer</h3>
+                            <div class="summary-line">
+                                <span>Payer</span>
+                                <strong id="summary-sender">-</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Payee</span>
+                                <strong id="summary-receiver">-</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Network</span>
+                                <strong>Kafka + Ledger</strong>
+                            </div>
+                            <div class="summary-total">
+                                <span>Total</span>
+                                <strong id="summary-amount">0.00 USD</strong>
+                            </div>
+                            <div class="mini-note">
+                                Uses JWT auth, Redis idempotency, Kafka eventing, and atomic DB ledger updates.
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <aside class="side-rail">
+            <section class="panel side-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Live Wallets</p>
+                        <h2>Seeded users</h2>
+                    </div>
+                    <button class="ghost-button subtle" id="refresh-users" type="button">Refresh</button>
+                </div>
+                <div id="users-grid" class="wallet-stack"></div>
+            </section>
+
+            <section class="panel side-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Wallet Onboarding</p>
+                        <h2>Create user</h2>
+                    </div>
+                </div>
+                <form id="user-form" class="stack-form">
+                    <label>
+                        User ID
+                        <input name="id" placeholder="demo-1" required>
+                    </label>
+                    <label>
+                        Full Name
+                        <input name="fullName" placeholder="Demo User" required>
+                    </label>
+                    <label>
+                        Email
+                        <input name="email" type="email" placeholder="demo@swiftpay.com" required>
+                    </label>
+                    <label>
+                        Mobile
+                        <input name="mobileNumber" placeholder="9000000010" required>
+                    </label>
+                    <label>
+                        Opening Balance
+                        <input name="balance" type="number" min="0" step="0.01" placeholder="250.00" required>
+                    </label>
+                    <label>
+                        Currency
+                        <input name="currency" value="USD" maxlength="3" required>
+                    </label>
+                    <label>
+                        Password
+                        <input name="password" type="password" value="demo123" required>
+                    </label>
+                    <button class="primary-button" type="submit">Create Wallet</button>
+                </form>
+            </section>
+        </aside>
+    </main>
+
+    <section class="insights-panel">
+        <div class="stats-ribbon">
+            <div class="stat-pill">
+                <span>Users</span>
+                <strong id="user-count">0</strong>
+            </div>
+            <div class="stat-pill">
+                <span>Transactions</span>
+                <strong id="transaction-count">0</strong>
+            </div>
+            <div class="stat-pill">
+                <span>Ledger Rows</span>
+                <strong id="ledger-count">0</strong>
+            </div>
+            <div class="stat-pill">
+                <span>Last Status</span>
+                <strong id="last-status">N/A</strong>
+            </div>
+        </div>
+
+        <div class="activity-layout">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Recent Payments</p>
+                        <h2>Transaction feed</h2>
+                    </div>
+                </div>
+                <div id="transactions-list" class="collection-list"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Ledger Trail</p>
+                        <h2>Balance movements</h2>
+                    </div>
+                </div>
+                <div id="ledger-list" class="collection-list"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Response Console</p>
+                        <h2>API output</h2>
+                    </div>
+                    <button class="ghost-button subtle" id="refresh-activity" type="button">Reload</button>
+                </div>
+                <pre id="response-console" class="console-block">Ready.</pre>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
